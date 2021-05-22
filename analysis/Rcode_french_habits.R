@@ -30,6 +30,17 @@ library(nFactors)
 library(RGenData)
 library(lavaan)
 library(semPlot)
+library(data.table)
+library(reshape2)
+
+
+# for network analysis
+library(corrplot)
+library(RColorBrewer)
+library(bootnet) 
+library(networktools)
+library(NetworkComparisonTest)
+library(qgraph)
 
 #---------------------------------------------------------------------------
 #                    PRELIMINARY STUFF 
@@ -42,6 +53,7 @@ home_path       <- substr(full_path, 1, pos+11)
 figures_path    <- file.path(home_path, 'analysis/figures') # here we will save the pdf of our figures
 #utilities_path  <- file.path(home_path, 'analysis/R') # here we will put any homemade function we might beed
 setwd (home_path)
+
 
 #------------------------------ load the databases -------------------------
 
@@ -77,16 +89,13 @@ QUEST <- subset(QUEST, sub != '83') # participant only used the extreme values o
 QUEST <- subset(QUEST, sub != '497') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions 
 QUEST <- subset(QUEST, sub != '499') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions
 
-QUEST <- subset(QUEST, sub != '501') # emtpy
-QUEST <- subset(QUEST, sub != '502') # emtpy
-QUEST <- subset(QUEST, sub != '503') # emtpy
+
 
 # ----------------------------------------------------------------------------------------------------
 #                                 DESCRIPTIVE ANALYSIS
 # ----------------------------------------------------------------------------------------------------
 
-
-# ------------------------- mean n and sd -------------------------------------------------------------
+# ---------------------------------- mean n and sd -------------------------------------------------------------
 var.subscales <- c("CESD_total","COHS_automaticity", "COHS_routine","EAT26_total",
                    "IAT_total","PCLS_total","PMPUQSV_total", "PSS_total", "QABB_total",
                    "OCIR_total","STAIS_total","STAIT_total")
@@ -109,6 +118,7 @@ var.B23.subscale <- c("UPPS_urgency","UPPS_premeditation",
 
 db.subscale.B23 <- B23[var.B23.subscale]
 describe(db.subscale.B23)
+
 
 
 #----------------------------------- alphas-----------------------------------------------
@@ -268,7 +278,8 @@ QUEST <- subset(QUEST, sub != '497') # participant only used the extreme values 
 QUEST <- subset(QUEST, sub != '499') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions
 
 
-#-------------------------------- Figure 1-----------------------------------------------
+
+#----------------------------------- Distributions: Figure 1-----------------------------------------------
 var.subscales <- c("CESD_total","COHS_automaticity", "COHS_routine","EAT26_total",
                    "IAT_total","PMPUQSV_total", "PSS_total","PCLS_total",
                    "OCIR_total","STAIS_total","STAIT_total", "UPPS_urgency",
@@ -317,4 +328,253 @@ pdf(file.path(figures_path,'Questionnaires_distribution.pdf'))
 print(ppp)
 dev.off()
 
+
+
+# ---------------------------------- Demografic  ------------------------------------------------------
+
+# count participants
+count(QUEST, c("sub")) # how many participants
+
+# Get only the demografic info from the questionnaire
+dem.var <- c("Age", "Genre","Langue[1]","Langue[2]","Langue[3]", "lateralite[1]","lateralite[2]","lateralite[3]", "dataset") 
+db.demografics <- QUEST[dem.var]
+
+# rename colons so that we know what they mean
+colnames(db.demografics)[colnames(db.demografics) == "Langue[1]"] <- "French_dominant"
+colnames(db.demografics)[colnames(db.demografics) == "Langue[2]"] <- "French_good"
+colnames(db.demografics)[colnames(db.demografics) == "Langue[3]"] <- "French_medium"
+
+colnames(db.demografics)[colnames(db.demografics) == "lateralite[1]"] <- "right_hand"
+colnames(db.demografics)[colnames(db.demografics) == "lateralite[2]"] <- "left_hand"
+colnames(db.demografics)[colnames(db.demografics) == "lateralite[3]"] <- "ambidextrous"
+
+# define factors
+db.demografics$Genre = factor(db.demografics$Genre)
+db.demografics$French_dominant = factor(db.demografics$French_dominant)
+db.demografics$French_good = factor(db.demografics$French_good)
+db.demografics$French_medium = factor(db.demografics$French_medium)
+
+db.demografics$right_hand = factor(db.demografics$right_hand)
+db.demografics$left_hand = factor(db.demografics$left_hand)
+db.demografics$ambidextrous = factor(db.demografics$ambidextrous)
+
+db.demografics$dataset = factor(db.demografics$dataset)
+
+# describe
+summary(db.demografics)
+describe(db.demografics)
+
+
+
+# ----------------------------------------------------------------------------------------------------
+#                                 COHS FRENCH VERSION VALIDATION
+# ----------------------------------------------------------------------------------------------------
+
+# prepare dataset of interest for EFA
+col = paste("COHS[",1:27,"]", sep="")
+db.COHS <- QUEST[col]
+db.COHS <- na.omit(db.COHS) # remove NAN lines
+
+#----------------------------------- Postulates -------------------------------------------------------
+
+# add formal tests for the variance covariance assumption
+KMO(db.COHS)
+#0.00 to 0.49 unacceptable.
+#0.50 to 0.59 miserable.
+#0.60 to 0.69 mediocre.
+#0.70 to 0.79 middling.
+#0.80 to 0.89 meritorious.
+#0.90 to 1.00 marvelous.
+
+cor_matrix <- cor(db.COHS)
+cortest.bartlett(cor_matrix, n = nrow(db.COHS)) 
+
+# check distributions before proceeding with FA
+describe (db.COHS)
+pairs.panels(na.omit(db.COHS))
+
+# correlation between factors
+corrf = corr.test(QUEST$COHS_automaticity, QUEST$COHS_routine)
+
+
+# ---------------------------------- EFA Determine N factors --------------------------------------------------
+# method 1 parallel analysis
+nFact  <- fa.parallel(db.COHS, fm = "ml") # suggests 4 with FA and 2 with PA (eigen value suggest 2 (Kaiser criteria of eigen value larger than 1), catell's suggest 2)
+# method 2 minimum average partial procedure
+nFact  <- vss(db.COHS) # minimum average partial procedure (MAP) suggests 2
+# method 3 optimnal coordinates and acceleration factor
+nFact  <- nScree(x = db.COHS, model = "factors") # accelleration factor suggest 2 and optimal coordinantes suggest 2
+summary(nFact)
+plotnScree(nFact) # here we have a very clear scree plot
+# method 4 "comparasion data"
+nFact <- EFACompData(db.COHS, 6, n.pop = 10000, n.samples = 500, alpha = .30, graph = T,
+                     corr.type = "pearson") # again 2 factors
+
+#---------------------------------- apply EFA with oblimin --------------------------------------------------
+quest.1.efa <- fa(r = db.COHS, nfactors = 2, rotate = "oblimin", fm = "ml")
+
+print(quest.1.efa$loadings,cutoff = 0.0) # print loadings for table 2
+
+#---------------------------------------- CFA -----------------------------------------------------
+
+# rename colons so than laavan can read them
+db.COHS.cfa <- db.COHS
+col_old = paste("COHS[",1:27,"]", sep="")
+col_new = paste("item",1:27,"", sep="")
+colnames(db.COHS.cfa)[colnames(db.COHS.cfa) == col_old] <- col_new
+
+# define model
+cohs.model <- "Automaticity =~ item3 + item5 + item8 + item9 + item11 + item16 + item19 + item21 + item23 + item25 + item26
+Routine =~  item1 + item2 + item4 + item6 + item7 + item10 + item12 + item13 + item14 + item15 + item17 + item18 + item20 + item22 + item24 + item27"
+
+# fit the model
+fit1 <- lavaan::cfa(cohs.model, data=db.COHS.cfa,std.lv=TRUE)
+summary(fit1, fit.measures=T,standardized=T)
+
+# plot
+lbls = c("i03", "i05", "i08","i09","i11","i16","i19","i21","i23", "i25", "i26",
+         "i01",  "i02", "i04", "i06",  "i07", "i10",  "i12", "i13",  "i14",  "i15",  "i17",  "i18",  "i20", "i22",  "i24", "i27",
+         "A", "R")
+semPaths(fit1,residuals=F,sizeMan=5,"std",
+         #posCol=c("skyblue4", "red"),
+         nodeLabels=lbls,
+         edge.color="skyblue4",
+         edge.label.cex=0.75,layout="circle")
+
+dev.print(pdf, file.path(figures_path,'Figure_CFA.pdf'))
+dev.off()
+
+
+# ----------------------------------------------------------------------------------------------------
+#                                 NETWORK ANALYSIS
+# ----------------------------------------------------------------------------------------------------
+
+
+# ------------------------------- data reduction  EFA ------------------------------------------------------
+# select subscales
+var.subscales <- c("OCIR_Washing","OCIR_checking","OCIR_ordering","OCIR_obsessing","OCIR_hoarding","OCIR_neutralising",
+                   "EAT26_oral_control","EAT26_dieting","EAT26_bulimia","IAT_salience","IAT_excessive_use","IAT_neglect_work",
+                   "IAT_anticipation","IAT_lack_control","IAT_neglect_social_life","PMPUQSV_dangerous","PMPUQSV_prohibited",
+                   "PMPUQSV_dependant", "STAIT_total","STAIS_total", "PSS_total","CESD_total","UPPS_urgency",
+                   "UPPS_premeditation", "UPPS_sensation", "UPPS_perseverance")
+
+db.subscale <- QUEST[var.subscales]
+describe(db.subscale)
+
+# verify postulates
+KMO(db.subscale)
+
+cor_matrix <- cor(db.subscale, use = "complete.obs")
+cortest.bartlett(cor_matrix, n = nrow(db.COHS))
+
+# remove the two subscales that do not have a satisfactory KMO
+var.subscales <- c("OCIR_Washing","OCIR_checking","OCIR_ordering","OCIR_obsessing","OCIR_hoarding","OCIR_neutralising",
+                   "EAT26_oral_control","EAT26_dieting","EAT26_bulimia","IAT_salience","IAT_excessive_use","IAT_neglect_work",
+                   "IAT_anticipation","IAT_lack_control","IAT_neglect_social_life","PMPUQSV_prohibited",
+                   "PMPUQSV_dependant", "STAIT_total","STAIS_total", "PSS_total","CESD_total","UPPS_urgency",
+                   "UPPS_premeditation", "UPPS_perseverance")
+db.subscale <- QUEST[var.subscales]
+describe(db.subscale)
+
+# extract factors
+
+# method 1 parallel analysis
+nFact  <- fa.parallel(db.subscale, fm = "ml") # 5
+
+# method 2 minimum average partial procedure
+nFact  <- vss(db.subscale) # 5 (MAP)
+
+# method 3 optimnal coordinates and acceleration factor
+nFact  <- nScree(x = na.omit(db.subscale), model = "factors") # accelleration factor suggest 5 and optimal coordinantes suggest 5
+summary(nFact)
+plotnScree(nFact) # 4 or 5 
+
+# method 5 "comparasion data"
+nFact <- EFACompData(na.omit(db.subscale), 8, n.pop = 10000, n.samples = 500, alpha = .30, graph = T,
+                     corr.type = "pearson") # 5 
+
+# apply EFA with oblimin
+quest.1.efa <- fa(r = db.subscale, nfactors =5, rotate = "oblimin", fm = "ml")
+
+print(quest.1.efa$loadings,cutoff = 0.2)
+
+# calculate the factors loadings
+s = factor.scores (db.subscale, quest.1.efa) # 
+s
+
+
+# ---------------------------------------- Figure 2 ----------------------------------------
+
+#----------------------------------------- pannel 1
+col_old = var.subscales
+col_new  <- c("OCI-R: washing","OCI-R: checking","OCI-R: ordering","OCI-R: obsessing","OCI-R: hoarding","OCI-R: neutralising",
+                             "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia","IAT: salience","IAT: excessive_use","IAT: neglect work",
+                             "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: dangerous","PMPUQSV: prohibited",
+                             "PMPUQSV: dependant", "STAI trait","STAI state", "PSS","CES-D","UPPS: urgency",
+                             "UPPS: lack of premeditation", "UPPS: sensation seeking", "UPPS: lack of perseverance")
+
+
+col_new  <- c("OCI-R: washing","OCI-R: checking","OCI-R: ordering","OCI-R: obsessing","OCI-R: hoarding","OCI-R: neutralising",
+              "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia","IAT: salience","IAT: excessive use","IAT: neglect work",
+              "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: prohibited",
+              "PMPUQSV: dependant", "STAI trait","STAI state", "PSS","CES-D","UPPS: urgency",
+              "UPPS: lack of premeditation", "UPPS: lack of perseverance")
+
+
+
+colnames(db.subscale)[colnames(db.subscale) == col_old] <- col_new
+corrmatrix <- cor(db.subscale, use="complete.obs")
+col1 <- colorRampPalette(brewer.pal(9,"BrBG"))
+corrplot(corrmatrix,method = "square", tl.col = "black", tl.cex = 0.75, sig.level = 0.05, insig = "pch", pch.cex = 1, col = col1(100))
+dev.print(pdf, file.path(figures_path,'Figure_EFA_subsccales_pannel_1.pdf'))
+dev.off()
+
+
+#----------------------------------------- pannel 2
+
+# get loadings into a dataset
+load = quest.1.efa$loadings
+load = load[]
+load = data.frame(load)
+setDT(load,keep.rownames=TRUE)[]
+colnames(load)[1] <- "Subscale"
+
+# order factor so that is the same as in correlation plot
+Ord <- c(24:1)
+load$Subscale <- reorder(load$Subscale, Ord) 
+
+loadings.m <- melt(load, id="Subscale", 
+                   measure=c("ML3", "ML1","ML2", "ML4","ML5"), 
+                   variable.name="Factor", value.name="Loading")
+
+
+# name factors
+labels <- c(ML3 = "Problematic media", ML1 = "Affective Stress",
+            ML2 = "Problematic eating", ML4 = "Compulsivity", ML5 = "Impulsivity")
+
+
+
+
+pp <- ggplot(loadings.m, aes(Subscale, abs(Loading), fill=Loading)) + 
+  facet_wrap(~ Factor, nrow=1, labeller = labeller(Factor = labels) ) + 
+  geom_bar(stat="identity") + #make the bars
+  coord_flip() + #flip the axes so the test names can be horizontal  
+  scale_fill_gradient2(name = "Loading", 
+                       high = "#006666", mid = "white", low = "goldenrod4", 
+                       midpoint=0, guide=F) +
+  ylab("Loading Strength") +
+  theme_bw(base_size=10)
+
+# let's make the plot nice looking
+ppp <-   pp + theme_bw(base_size = 10, base_family = "Helvetica")+
+  theme(strip.text.x = element_text(size = 8, face = "bold"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.background = element_rect(color="white", fill="white", linetype="solid"),
+        axis.title.x = element_text(size = 15, face = "bold"),
+        axis.title.y = element_text(size = 15, face = "bold"),
+        legend.position = "none") 
+
+dev.print(pdf, file.path(figures_path,'Figure_EFA_subsccales_pannel_2.pdf'))
+dev.off()
 
