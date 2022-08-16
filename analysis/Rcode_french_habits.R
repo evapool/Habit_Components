@@ -1,13 +1,13 @@
 ####################################################################################################
 #                                                                                                  #
-#                                                                                                  #                      
-#         Habits and stress in problematic reward seeking behaviors: 
-#              a French validation of the Creature of Habit Scale                                  # 
+#                                                                                                  #
+#         Habits and stress in problematic reward seeking behaviors:
+#              a French validation of the Creature of Habit Scale                                  #
 #                                                                                                  #
 #                                                                                                  #
 #                    Tamara Corino                                                                 #
-#                    Maelys Denis-Bonnin                                                           #    
-#                    Eva R Pool                                                                    # 
+#                    Maelys Denis-Bonnin                                                           #
+#                    Eva R Pool                                                                    #
 #                                                                                                  #
 # Created by E.R.P. on  September 2020                                                             #
 ####################################################################################################
@@ -37,13 +37,13 @@ library(reshape2)
 # for network analysis
 library(corrplot)
 library(RColorBrewer)
-library(bootnet) 
+library(bootnet)
 library(networktools)
 library(NetworkComparisonTest)
 library(qgraph)
 
 #---------------------------------------------------------------------------
-#                    PRELIMINARY STUFF 
+#                    PRELIMINARY STUFF
 #---------------------------------------------------------------------------
 
 # Set path
@@ -75,7 +75,7 @@ B3$dataset = 'B3'
 
 # create unique id for each dataset
 B2$sub = B2$sub+ 200
-B3$sub = B3$sub+ 300 
+B3$sub = B3$sub+ 300
 
 # join databases
 TMP  <- join (B1, B2, type = 'full')
@@ -84,9 +84,9 @@ QUEST <- join (TMP, B3, type = 'full')
 #------------------------- REMOVE PARTICIPANTS ---------------------------------------------
 
 # remove for missing data
-QUEST <- subset(QUEST, sub != 'NA') # remove missing lines 
-QUEST <- subset(QUEST, sub != '83') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions 
-QUEST <- subset(QUEST, sub != '497') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions 
+QUEST <- subset(QUEST, sub != 'NA') # remove missing lines
+QUEST <- subset(QUEST, sub != '83') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions
+QUEST <- subset(QUEST, sub != '497') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions
 QUEST <- subset(QUEST, sub != '499') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions
 
 
@@ -113,7 +113,7 @@ var.B1.subscale <- c("UPPS_negative_urgency","UPPS_positive_urgency",
 db.subscale.B1 <- B1[var.B1.subscale]
 describe(db.subscale.B1)
 
-var.B23.subscale <- c("UPPS_urgency","UPPS_premeditation", 
+var.B23.subscale <- c("UPPS_urgency","UPPS_premeditation",
                       "UPPS_sensation", "UPPS_perseverance")
 
 db.subscale.B23 <- B23[var.B23.subscale]
@@ -131,7 +131,7 @@ list_COHS_automaticity = c(11, 25, 3, 23, 19, 26, 8, 9, 16, 5, 21)
 col_COHS_automaticity = paste("COHS[",list_COHS_automaticity ,"]", sep="")
 
 # CES-d
-col_CESD = paste("CESD[",1:20,"]", sep="") 
+col_CESD = paste("CESD[",1:20,"]", sep="")
 
 # EAT
 col_EAT26 = paste("EAT26[",1:26,"]", sep="")
@@ -155,14 +155,14 @@ col_QABB = paste("QABB[",1:19,"]", sep="")
 col_OCIR = paste("OCIR[",1:18,"]", sep="")
 
 #STAIS
-col_STAIS = paste("STAIS[",1:20,"]", sep="") 
+col_STAIS = paste("STAIS[",1:20,"]", sep="")
 
 # STAIT
-col_STAIT = paste("STAIT[",1:20,"]", sep="") 
+col_STAIT = paste("STAIT[",1:20,"]", sep="")
 
 # create a list with the 2 subscales to see the alpha and correlations
 ALL <- list(CEDS = c(col_CESD),
-            COHS_routine = c(col_COHS_routine), 
+            COHS_routine = c(col_COHS_routine),
             COHS_automaticity = c(col_COHS_automaticity),
             EAT26 = c(col_EAT26),
             IAT = c(col_IAT),
@@ -175,7 +175,7 @@ ALL <- list(CEDS = c(col_CESD),
             STAIT = c(col_STAIT)
 )
 
-my.scales <- scoreItems(ALL,QUEST) 
+my.scales <- scoreItems(ALL,QUEST)
 my.scales$alpha
 
 B23 = subset(QUEST, dataset != 'B1')
@@ -186,7 +186,7 @@ B1 = subset(QUEST, dataset == 'B1')
 list_negative_urgency = c(4, 7, 12, 17)
 col_urgneg = paste("UPPS[",list_negative_urgency ,"]", sep="")
 
-# positive urgency 
+# positive urgency
 list_positive_urgency = c(2, 10, 15, 20)
 col_urgpos = paste("UPPS[",list_positive_urgency,"]", sep="")
 
@@ -205,12 +205,12 @@ col_sensation = paste("UPPS[",list_sensation ,"]", sep="")
 # alpha long
 SHORT <- list(URGPOS = c(col_urgpos),
               URGNEG = c(col_urgneg),
-              SEN = c(col_lackprem), 
+              SEN = c(col_lackprem),
               PERS = c(col_lackpers),
               PREM = c(col_sensation)
 )
 
-my.scales <- scoreItems(SHORT,B1) 
+my.scales <- scoreItems(SHORT,B1)
 my.scales$alpha
 
 # long version
@@ -233,12 +233,12 @@ col_sensation = paste("UPPS[",list_sensation ,"]", sep="")
 
 # alpha long
 LONG <- list(URG = c(col_urgency),
-             SEN = c(col_lackprem), 
+             SEN = c(col_lackprem),
              PERS = c(col_lackpers),
              PREM = c(col_sensation)
 )
 
-my.scales <- scoreItems(LONG,B23) 
+my.scales <- scoreItems(LONG,B23)
 
 my.scales$alpha
 
@@ -272,9 +272,9 @@ TMP   <- join (B1, B2, type = 'full')
 QUEST <- join (TMP, B3, type = 'full')
 
 # remmove again
-QUEST <- subset(QUEST, sub != 'NA') # remove missing lines 
-QUEST <- subset(QUEST, sub != '83') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions 
-QUEST <- subset(QUEST, sub != '497') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions 
+QUEST <- subset(QUEST, sub != 'NA') # remove missing lines
+QUEST <- subset(QUEST, sub != '83') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions
+QUEST <- subset(QUEST, sub != '497') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions
 QUEST <- subset(QUEST, sub != '499') # participant only used the extreme values on each scale and the time to complete the questionnaire is too short to be reading the questions
 
 
@@ -295,7 +295,7 @@ db_long <- gather(db.plot, questionnaire , score, CESD_total:UPPS_sensation, fac
 labels <- c(CESD_total = "CES-D", COHS_automaticity = "COHS automaticity", COHS_routine = "COHS routine",
             EAT26_total = "EAT-26", IAT_total = "IAT", PMPUQSV_total = "PMPUQ-SV", PSS_total = "PSS",
             PSS_total = "PSS", PCLS_total = "PCL-S", OCIR_total = "OCI-R", STAIS_total = "STAI-S",
-            STAIT_total = "STAI-T", UPPS_urgency = "UPPS urg.", UPPS_sensation = "UPPS sens. seek.", 
+            STAIT_total = "STAI-T", UPPS_urgency = "UPPS urg.", UPPS_sensation = "UPPS sens. seek.",
             UPPS_perseverance = "UPPS lack of pers.", UPPS_premeditation = "UPPS lack of perm.")
 
 
@@ -309,7 +309,7 @@ pp = ggplot(data = db_long, aes (x = score, fill = questionnaire)) +
     title = '',
     x = 'Questionnaires',
     y = "Scores"
-  ) 
+  )
 
 # let's make the plot nice looking
 ppp <-   pp + theme_bw(base_size = 10, base_family = "Helvetica")+
@@ -321,7 +321,7 @@ ppp <-   pp + theme_bw(base_size = 10, base_family = "Helvetica")+
         axis.text.x  = element_blank(),
         axis.title.x = element_text(size = 15, face = "bold"),
         axis.title.y = element_text(size = 15, face = "bold"),
-        legend.position = "none") 
+        legend.position = "none")
 
 # let's print the plot in a pdf document
 pdf(file.path(figures_path,'Questionnaires_distribution.pdf'))
@@ -336,7 +336,7 @@ dev.off()
 count(QUEST, c("sub")) # how many participants
 
 # Get only the demografic info from the questionnaire
-dem.var <- c("Age", "Genre","Langue[1]","Langue[2]","Langue[3]", "lateralite[1]","lateralite[2]","lateralite[3]", "dataset") 
+dem.var <- c("Age", "Genre","Langue[1]","Langue[2]","Langue[3]", "lateralite[1]","lateralite[2]","lateralite[3]", "dataset")
 db.demografics <- QUEST[dem.var]
 
 # rename colons so that we know what they mean
@@ -387,7 +387,7 @@ KMO(db.COHS)
 #0.90 to 1.00 marvelous.
 
 cor_matrix <- cor(db.COHS)
-cortest.bartlett(cor_matrix, n = nrow(db.COHS)) 
+cortest.bartlett(cor_matrix, n = nrow(db.COHS))
 
 # check distributions before proceeding with FA
 describe (db.COHS)
@@ -450,7 +450,7 @@ dev.off()
 # ----------------------------------------------------------------------------------------------------
 
 
-# ------------------------------- data reduction  EFA ------------------------------------------------------
+# ------------------------------- extraction of transdiagnostic factors:  EFA ------------------------------------------------------
 # select subscales
 var.subscales <- c("OCIR_Washing","OCIR_checking","OCIR_ordering","OCIR_obsessing","OCIR_hoarding","OCIR_neutralising",
                    "EAT26_oral_control","EAT26_dieting","EAT26_bulimia","IAT_salience","IAT_excessive_use","IAT_neglect_work",
@@ -470,7 +470,7 @@ cortest.bartlett(cor_matrix, n = nrow(db.COHS))
 # remove the two subscales that do not have a satisfactory KMO
 var.subscales <- c("OCIR_Washing","OCIR_checking","OCIR_ordering","OCIR_obsessing","OCIR_hoarding","OCIR_neutralising",
                    "EAT26_oral_control","EAT26_dieting","EAT26_bulimia","IAT_salience","IAT_excessive_use","IAT_neglect_work",
-                   "IAT_anticipation","IAT_lack_control","IAT_neglect_social_life","PMPUQSV_prohibited",
+                   "IAT_anticipation","IAT_lack_control","IAT_neglect_social_life","PMPUQSV_prohibited","PMPUQSV_dangerous",
                    "PMPUQSV_dependant", "STAIT_total","STAIS_total", "PSS_total","CESD_total","UPPS_urgency",
                    "UPPS_premeditation", "UPPS_perseverance")
 db.subscale <- QUEST[var.subscales]
@@ -487,11 +487,11 @@ nFact  <- vss(db.subscale) # 5 (MAP)
 # method 3 optimnal coordinates and acceleration factor
 nFact  <- nScree(x = na.omit(db.subscale), model = "factors") # accelleration factor suggest 5 and optimal coordinantes suggest 5
 summary(nFact)
-plotnScree(nFact) # 4 or 5 
+plotnScree(nFact) # 4 or 5
 
 # method 5 "comparasion data"
 nFact <- EFACompData(na.omit(db.subscale), 8, n.pop = 10000, n.samples = 500, alpha = .30, graph = T,
-                     corr.type = "pearson") # 5 
+                     corr.type = "pearson") # 5
 
 # apply EFA with oblimin
 quest.1.efa <- fa(r = db.subscale, nfactors =5, rotate = "oblimin", fm = "ml")
@@ -499,24 +499,18 @@ quest.1.efa <- fa(r = db.subscale, nfactors =5, rotate = "oblimin", fm = "ml")
 print(quest.1.efa$loadings,cutoff = 0.2)
 
 # calculate the factors loadings
-s = factor.scores (db.subscale, quest.1.efa) # 
+s = factor.scores (db.subscale, quest.1.efa) #
 s
 
 
-# ---------------------------------------- Figure 2 ----------------------------------------
+# ---------------------------------------- Figure 3 and 4 ----------------------------------------
 
 #----------------------------------------- pannel 1
 col_old = var.subscales
-col_new  <- c("OCI-R: washing","OCI-R: checking","OCI-R: ordering","OCI-R: obsessing","OCI-R: hoarding","OCI-R: neutralising",
-                             "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia","IAT: salience","IAT: excessive_use","IAT: neglect work",
-                             "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: dangerous","PMPUQSV: prohibited",
-                             "PMPUQSV: dependant", "STAI trait","STAI state", "PSS","CES-D","UPPS: urgency",
-                             "UPPS: lack of premeditation", "UPPS: sensation seeking", "UPPS: lack of perseverance")
-
 
 col_new  <- c("OCI-R: washing","OCI-R: checking","OCI-R: ordering","OCI-R: obsessing","OCI-R: hoarding","OCI-R: neutralising",
               "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia","IAT: salience","IAT: excessive use","IAT: neglect work",
-              "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: prohibited",
+              "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: dangerous","PMPUQSV: prohibited",
               "PMPUQSV: dependant", "STAI trait","STAI state", "PSS","CES-D","UPPS: urgency",
               "UPPS: lack of premeditation", "UPPS: lack of perseverance")
 
@@ -540,11 +534,11 @@ setDT(load,keep.rownames=TRUE)[]
 colnames(load)[1] <- "Subscale"
 
 # order factor so that is the same as in correlation plot
-Ord <- c(24:1)
-load$Subscale <- reorder(load$Subscale, Ord) 
+Ord <- c(25:1)
+load$Subscale <- reorder(load$Subscale, Ord)
 
-loadings.m <- melt(load, id="Subscale", 
-                   measure=c("ML3", "ML1","ML2", "ML4","ML5"), 
+loadings.m <- melt(load, id="Subscale",
+                   measure=c("ML3", "ML1","ML2", "ML4","ML5"),
                    variable.name="Factor", value.name="Loading")
 
 
@@ -555,12 +549,12 @@ labels <- c(ML3 = "Problematic media", ML1 = "Affective Stress",
 
 
 
-pp <- ggplot(loadings.m, aes(Subscale, abs(Loading), fill=Loading)) + 
-  facet_wrap(~ Factor, nrow=1, labeller = labeller(Factor = labels) ) + 
+pp <- ggplot(loadings.m, aes(Subscale, abs(Loading), fill=Loading)) +
+  facet_wrap(~ Factor, nrow=1, labeller = labeller(Factor = labels) ) +
   geom_bar(stat="identity") + #make the bars
-  coord_flip() + #flip the axes so the test names can be horizontal  
-  scale_fill_gradient2(name = "Loading", 
-                       high = "#006666", mid = "white", low = "goldenrod4", 
+  coord_flip() + #flip the axes so the test names can be horizontal
+  scale_fill_gradient2(name = "Loading",
+                       high = "#006666", mid = "white", low = "goldenrod4",
                        midpoint=0, guide=F) +
   ylab("Loading Strength") +
   theme_bw(base_size=10)
@@ -573,8 +567,88 @@ ppp <-   pp + theme_bw(base_size = 10, base_family = "Helvetica")+
         strip.background = element_rect(color="white", fill="white", linetype="solid"),
         axis.title.x = element_text(size = 15, face = "bold"),
         axis.title.y = element_text(size = 15, face = "bold"),
-        legend.position = "none") 
+        legend.position = "none")
 
 dev.print(pdf, file.path(figures_path,'Figure_EFA_subsccales_pannel_2.pdf'))
+print(ppp)
 dev.off()
+
+
+
+# -------------------------------- Network Dynamic Analysis
+
+var.net = c("COHS_automaticity", "COHS_routine" )
+db.network.tmp <- QUEST[var.net]
+
+# merge with the FULL database
+axes <- s$scores
+
+# combine
+db.network <- cbind(db.network.tmp, axes)
+
+# rename with interpreted factors
+old_names = c ("COHS_automaticity", "COHS_routine", "ML3","ML1","ML2","ML4","ML5")
+new_names <- c("Automaticity","Routine","Problematic Media","Affective Stress","Problematic Eating","Compulsivity","Implusivity")
+groups   <- c("habit", "habit", "m", "m", "m", "m", "m")
+colnames(db.network)[colnames(db.network) == old_names] <- new_names
+
+# estimate network
+mynetwork <- estimateNetwork(db.network, default ="EBICglasso") # lasso with Extended Baysian information criteria to select lasso tuning parameter
+
+c1 <- centralityPlot(mynetwork)
+
+CentralityTable <- centralityTable(mynetwork)
+
+nledges <- getWmat(mynetwork)
+
+
+# ---------------------------------------- FIGURE NETWORK
+plot_network <- qgraph(nledges,
+                posCol = c("#006666","#006666"),
+                negCol = c("goldenrod4","goldenrod4"),
+                label.norm = "OOOOOOOOOO",
+                minimum = 0.1,
+                cut = 0.1,
+                shape = "ellipse",
+                vsize = 13,
+                layout = "spring",
+                labels = new_names,
+                node.width = 1.5,
+                label.scale = T,
+                edge.labels = TRUE,
+                edge.label.margin = 0.03,
+                labels = names(nledges),
+                label.scale = FALSE)
+
+
+dev.print(pdf, file.path(figures_path,'Figure_Network.pdf'))
+print(plot_network)
+dev.off()
+
+
+# estimate network stability
+b1 <- bootnet(mynetwork, boots= 1000, nCores = 1,
+              statistics = c("strength","expectedInfluence","edge"))
+
+b2 <- bootnet(mynetwork, boots= 1000, nCores = 1, type = "case",
+              statistics = c("strength","expectedInfluence","edge"))
+
+b3 <- bootnet(mynetwork, boots= 1000, nCores = 1, type = "case",
+              statistics = c("strength","closeness","betweenness"))
+
+
+# get centrality stability coefficient (ideally it should be larger than 0.5)
+corStability(b3)
+corStability(b2)
+
+
+# edge stability
+plot (b1, labels= F, order = "sample")
+# centrality stability graph
+plot (b2)
+# strength centrality diff test
+plot (b1, "strength", order = "sample", label = TRUE)
+# EI diff test
+plot(b1, "expectedInfluence", order = "sample", label = T)
+
 
