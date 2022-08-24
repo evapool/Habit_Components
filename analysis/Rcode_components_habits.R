@@ -1,9 +1,8 @@
 ####################################################################################################
 #                                                                                                  #
 #                                                                                                  #
-#         Habits and stress in problematic reward seeking behaviors:
-#              a French validation of the Creature of Habit Scale                                  #
-#                                                                                                  #
+# Differential influence of the components of habitual behavior on compulsive and problematic      #
+#                reward-seeking behaviors                                                          #
 #                                                                                                  #
 #                    Tamara Corino                                                                 #
 #                    Maelys Denis-Bonnin                                                           #
@@ -32,7 +31,7 @@ library(lavaan)
 library(semPlot)
 library(data.table)
 library(reshape2)
-
+library(Hmisc)
 
 # for network analysis
 library(corrplot)
@@ -575,6 +574,8 @@ dev.off()
 
 
 
+
+
 # -------------------------------- Network Dynamic Analysis
 
 var.net = c("COHS_automaticity", "COHS_routine" )
@@ -591,6 +592,17 @@ old_names = c ("COHS_automaticity", "COHS_routine", "ML3","ML1","ML2","ML4","ML5
 new_names <- c("Automaticity","Routine","Problematic Media","Affective Stress","Problematic Eating","Compulsivity","Implusivity")
 groups   <- c("habit", "habit", "m", "m", "m", "m", "m")
 colnames(db.network)[colnames(db.network) == old_names] <- new_names
+
+# descriptive correlation
+
+
+factor_corr_plot <- cpplus(db.network, reorder=TRUE, alpha=0.005)
+
+
+dev.print(pdf, file.path(figures_path,'Figure_EFA_correlation.pdf'))
+print(ppp)
+dev.off()
+
 
 # estimate network
 mynetwork <- estimateNetwork(db.network, default ="EBICglasso") # lasso with Extended Baysian information criteria to select lasso tuning parameter

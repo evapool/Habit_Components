@@ -1,4 +1,4 @@
-# Habits and stress in problematic reward seeking behaviors: a French validation of the Creature of Habit Scale
+# Differential influence of the components of habitual behavior on compulsive and problematic reward-seeking behaviors
 
 This repository contains scripts and data to reproduce the results reported in the study above
 
