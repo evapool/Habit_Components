@@ -47,10 +47,14 @@ library(qgraph)
 
 # Set path
 full_path       <- dirname(rstudioapi::getActiveDocumentContext()$path) # this gets the path were we are in right noe
-pos             <- regexpr("French_Habit", full_path) # we want the path to the root folder
-home_path       <- substr(full_path, 1, pos+11)
+pos             <- regexpr("AutoRoutine_Mentalhealth", full_path) # we want the path to the root folder
+home_path       <- substr(full_path, 1, pos+23)
 figures_path    <- file.path(home_path, 'analysis/figures') # here we will save the pdf of our figures
-#utilities_path  <- file.path(home_path, 'analysis/R') # here we will put any homemade function we might beed
+utilities_path  <- file.path(home_path, 'analysis/R') # here we will put any homemade function we might beed
+
+# run set up
+source(file.path(utilities_path,'cpplus.r'))# useful functions
+
 setwd (home_path)
 
 
@@ -596,11 +600,11 @@ colnames(db.network)[colnames(db.network) == old_names] <- new_names
 # descriptive correlation
 
 
-factor_corr_plot <- cpplus(db.network, reorder=TRUE, alpha=0.005)
+factor_corr_plot <- cpplus(db.network, reorder=TRUE, alpha=0.05)
 
 
 dev.print(pdf, file.path(figures_path,'Figure_EFA_correlation.pdf'))
-print(ppp)
+print(factor_corr_plot)
 dev.off()
 
 

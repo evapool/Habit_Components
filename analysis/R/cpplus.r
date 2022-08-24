@@ -34,13 +34,13 @@ cpplus <- function(V,reorder=TRUE,alpha=0.005,...) {
 
   if(reorder==FALSE) {
     corrplot(allcor2,method="color",tl.col="black",p.mat=pmat, sig.level=alpha,insig="pch",pch=4,pch.cex=0.6,pch.col="grey50",
-      addCoefasPercent=TRUE,addgrid.col="grey",col=colpal(100),addCoef.col=allcor2col,cl.pos="b")
+      addCoefasPercent=F,addgrid.col="grey",col=colpal(100),addCoef.col=allcor2col)
   }
   if(reorder==TRUE) {
     horder <- corrplot(allcor2,method="color",col="white",order="hclust",hclust.method="ward.D")
     horder <- rownames(horder$corr)
     corrplot(allcor2,method="color",tl.col="black",p.mat=pmat, sig.level=alpha,insig="pch",pch=4,pch.cex=0.6,pch.col="grey50",
-      addCoefasPercent=TRUE,addgrid.col="grey",col=colpal(100),addCoef.col=allcor2col[horder,horder],cl.pos="b", order="hclust",hclust.method="ward.D")
+      addCoefasPercent=F,addgrid.col="grey",col=colpal(100),addCoef.col=allcor2col[horder,horder], order="hclust",hclust.method="ward.D")
   }
   invisible(alldat)
 }
