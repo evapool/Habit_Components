@@ -197,6 +197,7 @@ col_urgpos = paste("UPPS[",list_positive_urgency,"]", sep="")
 list_premeditation = c(1, 6, 13, 19)
 col_lackprem = paste("UPPS[",list_premeditation ,"]", sep="")
 
+
 # lack perseverance
 list_perseverance = c(5, 8, 11, 16)
 col_lackpers = paste("UPPS[",list_perseverance ,"]", sep="")
@@ -370,7 +371,7 @@ describe(db.demografics)
 
 
 # ----------------------------------------------------------------------------------------------------
-#                                 COHS FRENCH VERSION VALIDATION
+#                                  COHS FRENCH VERSION VALIDATION
 # ----------------------------------------------------------------------------------------------------
 
 # prepare dataset of interest for EFA
@@ -397,7 +398,7 @@ describe (db.COHS)
 pairs.panels(na.omit(db.COHS))
 
 # correlation between factors
-corrf = corr.test(QUEST$COHS_automaticity, QUEST$COHS_routine)
+corrf = corr.test(QUEST$COHS_automaticity, QUEST$COHS_routine) # move this in a different section
 
 
 # ---------------------------------- EFA Determine N factors --------------------------------------------------
@@ -416,7 +417,7 @@ nFact <- EFACompData(db.COHS, 6, n.pop = 10000, n.samples = 500, alpha = .30, gr
 #---------------------------------- apply EFA with oblimin --------------------------------------------------
 quest.1.efa <- fa(r = db.COHS, nfactors = 2, rotate = "oblimin", fm = "ml")
 
-print(quest.1.efa$loadings,cutoff = 0.0) # print loadings for table 2
+print(quest.1.efa$loadings,cutoff = 0.2) # print loadings for table 2
 
 #---------------------------------------- CFA -----------------------------------------------------
 
@@ -430,6 +431,7 @@ colnames(db.COHS.cfa)[colnames(db.COHS.cfa) == col_old] <- col_new
 cohs.model <- "Automaticity =~ item3 + item5 + item8 + item9 + item11 + item16 + item19 + item21 + item23 + item25 + item26
 Routine =~  item1 + item2 + item4 + item6 + item7 + item10 + item12 + item13 + item14 + item15 + item17 + item18 + item20 + item22 + item24 + item27"
 
+
 # fit the model
 fit1 <- lavaan::cfa(cohs.model, data=db.COHS.cfa,std.lv=TRUE)
 summary(fit1, fit.measures=T,standardized=T)
@@ -438,14 +440,30 @@ summary(fit1, fit.measures=T,standardized=T)
 lbls = c("i03", "i05", "i08","i09","i11","i16","i19","i21","i23", "i25", "i26",
          "i01",  "i02", "i04", "i06",  "i07", "i10",  "i12", "i13",  "i14",  "i15",  "i17",  "i18",  "i20", "i22",  "i24", "i27",
          "A", "R")
+
 semPaths(fit1,residuals=F,sizeMan=5,"std",
          #posCol=c("skyblue4", "red"),
-         nodeLabels=lbls,
+         #nodeLabels=lbls,
          edge.color="skyblue4",
          edge.label.cex=0.75,layout="circle")
 
 dev.print(pdf, file.path(figures_path,'Figure_CFA.pdf'))
 dev.off()
+
+
+
+# ----------------------------------------------------------------------------------------------------
+#                                 BAYSIAN LASSO CFA
+# ----------------------------------------------------------------------------------------------------
+
+# write COHS data in the right format in the BLCFA analysis folder
+write.table(db.COHS,file.path(utilities_path,'CFA_Baysian_Lasso','COHS_french.txt'),sep="\t",row.names=F, col.names = F)
+
+# for Baysian lasso CFA run (source main.R in CFA_Baysian_Lasso)
+setwd(file.path(utilities_path,'CFA_Baysian_Lasso'))
+
+source ('main.R')
+
 
 
 # ----------------------------------------------------------------------------------------------------
