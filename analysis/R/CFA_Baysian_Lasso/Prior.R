@@ -2,11 +2,11 @@
 
 #Measurement equation.
 
-#Prior mean of Lambda, NY*NZ (either 0.0 or 1)
+#Prior mean of Lambda, NY*NZ (either 0.0 or 1) 
 PLY<-matrix(c(
-  0,0.0, #1
+  0,1, #1 # first one of the subscale needs to be set to 1
   0,0.0, #2
-  0.0,0, #3
+  1,0, #3 first one of the subsclae needs to be set to 1
   0,0.0, #4
   0.0,0, #5
   0,0.0, #6
@@ -51,6 +51,6 @@ R.zero<-rou.scale*diag(1,NZ)
 
 #Hyperparameters of Gamma distribution for the shrinkage parameter
 a_lambda<-1
-b_lambda<-0.01
+b_lambda<-0.0001
 
 

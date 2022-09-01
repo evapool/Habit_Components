@@ -15,16 +15,20 @@ library(psychometric)
 set.seed(1)
 
 source("def_con.R") 
+
+source("ind.R") 
+
 source("def_rec.R")
-source("ind.R")   
+  
 source("Prior.R")    
+
      
 for(CIR in 1:CNUM){
     
 	source("read_observed.R")  
 	source("init1.R")	         										
       source("Gibbs.R")          
-	EmLY[CIR,]=apply(ELY,FUN=mean,MAR=c(2))
+	    EmLY[CIR,]=apply(ELY,FUN=mean,MAR=c(2))
       EmMU[CIR,]=apply(EMU,FUN=mean,MAR=c(2))
       EmPSX[CIR,,]=apply(EPSX,FUN=mean,MAR=c(2,3))
       EminvPSX[CIR,,]=apply(EinvPSX,FUN=mean,MAR=c(2,3))
@@ -40,7 +44,7 @@ for(CIR in 1:CNUM){
 
       Empostp[CIR]=mean(Epostp)
             
-	source("write_result.R")   
+	   source("write_result.R")   
       source("HPD.R")                  
       source("write_model fit.R")
       

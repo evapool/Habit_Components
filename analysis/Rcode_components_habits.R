@@ -442,10 +442,11 @@ lbls = c("i03", "i05", "i08","i09","i11","i16","i19","i21","i23", "i25", "i26",
          "A", "R")
 
 semPaths(fit1,residuals=F,sizeMan=5,"std",
-         #posCol=c("skyblue4", "red"),
-         #nodeLabels=lbls,
+         posCol=c("skyblue4", "red"),
+         nodeLabels=lbls,
          edge.color="skyblue4",
          edge.label.cex=0.75,layout="circle")
+
 
 dev.print(pdf, file.path(figures_path,'Figure_CFA.pdf'))
 dev.off()
@@ -459,9 +460,8 @@ dev.off()
 # write COHS data in the right format in the BLCFA analysis folder
 write.table(db.COHS,file.path(utilities_path,'CFA_Baysian_Lasso','COHS_french.txt'),sep="\t",row.names=F, col.names = F)
 
-# for Baysian lasso CFA run (source main.R in CFA_Baysian_Lasso)
+# for Baysian lasso CFA run 
 setwd(file.path(utilities_path,'CFA_Baysian_Lasso'))
-
 source ('main.R')
 
 
@@ -497,6 +497,14 @@ var.subscales <- c("OCIR_Washing","OCIR_checking","OCIR_ordering","OCIR_obsessin
 db.subscale <- QUEST[var.subscales]
 describe(db.subscale)
 
+fact_col_new  <- c("OCI-R: washing","OCI-R: checking","OCI-R: ordering","OCI-R: obsessing","OCI-R: hoarding","OCI-R: neutralizing",
+                   "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia","IAT: salience","IAT: excessive use","IAT: neglect work",
+                   "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: prohibited","PMPUQSV: dangerous",
+                   "PMPUQSV: dependace", "STAI trait", "STAI state", "PSS", "CEDS", "UPPS: Urgency",
+                   "UPPS: lack of premeditation", "UPPS: lack of perseverance")
+
+
+colnames(db.subscale)[colnames(db.subscale) == var.subscales] <- fact_col_new
 # extract factors
 
 # method 1 parallel analysis
@@ -529,10 +537,9 @@ s
 #----------------------------------------- pannel 1
 col_old = var.subscales
 
-col_new  <- c("OCI-R: washing","OCI-R: checking","OCI-R: ordering","OCI-R: obsessing","OCI-R: hoarding","OCI-R: neutralising",
+col_new  <- c("OCI-R: washing","OCI-R: checking","OCI-R: ordering","OCI-R: obsessing","OCI-R: hoarding","OCI-R: neutralizing",
               "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia","IAT: salience","IAT: excessive use","IAT: neglect work",
-              "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: dangerous","PMPUQSV: prohibited",
-              "PMPUQSV: dependant", "STAI trait","STAI state", "PSS","CES-D","UPPS: urgency",
+              "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: prohibited","PMPUQSV: dangerous", "PMPUQSV: dependace",
               "UPPS: lack of premeditation", "UPPS: lack of perseverance")
 
 
@@ -547,12 +554,17 @@ dev.off()
 
 #----------------------------------------- pannel 2
 
+
+
+
 # get loadings into a dataset
 load = quest.1.efa$loadings
 load = load[]
 load = data.frame(load)
 setDT(load,keep.rownames=TRUE)[]
 colnames(load)[1] <- "Subscale"
+
+colnames(load)[colnames(load) == fact_col_old] <- fact_col_new
 
 # order factor so that is the same as in correlation plot
 Ord <- c(25:1)
@@ -611,7 +623,7 @@ db.network <- cbind(db.network.tmp, axes)
 
 # rename with interpreted factors
 old_names = c ("COHS_automaticity", "COHS_routine", "ML3","ML1","ML2","ML4","ML5")
-new_names <- c("Automaticity","Routine","Problematic Media","Affective Stress","Problematic Eating","Compulsivity","Implusivity")
+new_names <- c("Automaticity","Routine","Problematic Media","Affective Stress","Problematic Eating","Compulsivity","Impulsivity")
 groups   <- c("habit", "habit", "m", "m", "m", "m", "m")
 colnames(db.network)[colnames(db.network) == old_names] <- new_names
 
