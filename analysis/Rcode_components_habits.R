@@ -47,8 +47,8 @@ library(qgraph)
 
 # Set path
 full_path       <- dirname(rstudioapi::getActiveDocumentContext()$path) # this gets the path were we are in right noe
-pos             <- regexpr("AutoRoutine_Mentalhealth", full_path) # we want the path to the root folder
-home_path       <- substr(full_path, 1, pos+23)
+pos             <- regexpr("Habit_Components", full_path) # we want the path to the root folder
+home_path       <- substr(full_path, 1, pos+16)
 figures_path    <- file.path(home_path, 'analysis/figures') # here we will save the pdf of our figures
 utilities_path  <- file.path(home_path, 'analysis/R') # here we will put any homemade function we might beed
 
@@ -454,19 +454,6 @@ dev.off()
 
 
 # ----------------------------------------------------------------------------------------------------
-#                                 BAYSIAN LASSO CFA
-# ----------------------------------------------------------------------------------------------------
-
-# write COHS data in the right format in the BLCFA analysis folder
-write.table(db.COHS,file.path(utilities_path,'CFA_Baysian_Lasso','COHS_french.txt'),sep="\t",row.names=F, col.names = F)
-
-# for Baysian lasso CFA run 
-setwd(file.path(utilities_path,'CFA_Baysian_Lasso'))
-source ('main.R')
-
-
-
-# ----------------------------------------------------------------------------------------------------
 #                                 NETWORK ANALYSIS
 # ----------------------------------------------------------------------------------------------------
 
@@ -488,30 +475,36 @@ KMO(db.subscale)
 cor_matrix <- cor(db.subscale, use = "complete.obs")
 cortest.bartlett(cor_matrix, n = nrow(db.COHS))
 
-# remove the two subscales that do not have a satisfactory KMO
+
+# remove the the subscales that do not have a satisfactory KMO
 var.subscales <- c("OCIR_Washing","OCIR_checking","OCIR_ordering","OCIR_obsessing","OCIR_hoarding","OCIR_neutralising",
-                   "EAT26_oral_control","EAT26_dieting","EAT26_bulimia","IAT_salience","IAT_excessive_use","IAT_neglect_work",
-                   "IAT_anticipation","IAT_lack_control","IAT_neglect_social_life","PMPUQSV_prohibited","PMPUQSV_dangerous",
-                   "PMPUQSV_dependant", "STAIT_total","STAIS_total", "PSS_total","CESD_total","UPPS_urgency",
-                   "UPPS_premeditation", "UPPS_perseverance")
+                   "EAT26_oral_control","EAT26_dieting","EAT26_bulimia",
+                   "IAT_salience","IAT_excessive_use","IAT_neglect_work",
+                   "IAT_anticipation","IAT_lack_control","IAT_neglect_social_life",
+                   "PMPUQSV_prohibited","PMPUQSV_dependant", 
+                   "STAIT_total","STAIS_total", "PSS_total","CESD_total",
+                   "UPPS_urgency", "UPPS_premeditation", "UPPS_perseverance", "UPPS_sensation")
 db.subscale <- QUEST[var.subscales]
 describe(db.subscale)
 
 fact_col_new  <- c("OCI-R: washing","OCI-R: checking","OCI-R: ordering","OCI-R: obsessing","OCI-R: hoarding","OCI-R: neutralizing",
-                   "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia","IAT: salience","IAT: excessive use","IAT: neglect work",
-                   "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: prohibited","PMPUQSV: dangerous",
-                   "PMPUQSV: dependace", "STAI trait", "STAI state", "PSS", "CEDS", "UPPS: Urgency",
-                   "UPPS: lack of premeditation", "UPPS: lack of perseverance")
+                   "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia",
+                   "IAT: salience","IAT: excessive use","IAT: neglect work",
+                   "IAT: anticipation","IAT: lack of control","IAT: neglect social life",
+                   "PMPUQSV: prohibited", "PMPUQSV: dependace", 
+                   "STAI trait", "STAI state", "PSS", "CEDS", 
+                   "UPPS: Urgency", "UPPS: lack of premeditation", "UPPS: lack of perseverance", "UPPS: sensation")
 
 
 colnames(db.subscale)[colnames(db.subscale) == var.subscales] <- fact_col_new
 # extract factors
 
 # method 1 parallel analysis
-nFact  <- fa.parallel(db.subscale, fm = "ml") # 5
+nFact  <- fa.parallel(db.subscale, fm = "ml") # 6 or 5
 
 # method 2 minimum average partial procedure
 nFact  <- vss(db.subscale) # 5 (MAP)
+
 
 # method 3 optimnal coordinates and acceleration factor
 nFact  <- nScree(x = na.omit(db.subscale), model = "factors") # accelleration factor suggest 5 and optimal coordinantes suggest 5
@@ -538,9 +531,12 @@ s
 col_old = var.subscales
 
 col_new  <- c("OCI-R: washing","OCI-R: checking","OCI-R: ordering","OCI-R: obsessing","OCI-R: hoarding","OCI-R: neutralizing",
-              "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia","IAT: salience","IAT: excessive use","IAT: neglect work",
-              "IAT: anticipation","IAT: lack of control","IAT: neglect social life","PMPUQSV: prohibited","PMPUQSV: dangerous", "PMPUQSV: dependace",
-              "UPPS: lack of premeditation", "UPPS: lack of perseverance")
+                   "EAT-26: oral control","EAT-26: dieting","EAT-26: bulimia",
+                   "IAT: salience","IAT: excessive use","IAT: neglect work",
+                   "IAT: anticipation","IAT: lack of control","IAT: neglect social life",
+                   "PMPUQSV: prohibited", "PMPUQSV: dependace", 
+                   "STAI trait", "STAI state", "PSS", "CEDS", 
+                   "UPPS: Urgency", "UPPS: lack of premeditation", "UPPS: lack of perseverance", "UPPS: sensation")
 
 
 
@@ -553,9 +549,6 @@ dev.off()
 
 
 #----------------------------------------- pannel 2
-
-
-
 
 # get loadings into a dataset
 load = quest.1.efa$loadings
@@ -656,13 +649,13 @@ plot_network <- qgraph(nledges,
                 minimum = 0.1,
                 cut = 0.1,
                 shape = "ellipse",
-                vsize = 13,
+                vsize = 12,
                 layout = "spring",
                 labels = new_names,
-                node.width = 1.5,
+                node.width = 1.3,
                 label.scale = T,
                 edge.labels = TRUE,
-                edge.label.margin = 0.03,
+                edge.label.margin = 0.01,
                 labels = names(nledges),
                 label.scale = FALSE)
 
@@ -673,13 +666,13 @@ dev.off()
 
 
 # estimate network stability
-b1 <- bootnet(mynetwork, boots= 1000, nCores = 1,
+b1 <- bootnet(mynetwork, boots= 10000, nCores = 4,
               statistics = c("strength","expectedInfluence","edge"))
 
-b2 <- bootnet(mynetwork, boots= 1000, nCores = 1, type = "case",
+b2 <- bootnet(mynetwork, boots= 10000, nCores = 4, type = "case",
               statistics = c("strength","expectedInfluence","edge"))
 
-b3 <- bootnet(mynetwork, boots= 1000, nCores = 1, type = "case",
+b3 <- bootnet(mynetwork, boots= 10000, nCores = 4, type = "case",
               statistics = c("strength","closeness","betweenness"))
 
 
